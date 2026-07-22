@@ -1,0 +1,88 @@
+services:
+  # PostgreSQL - основна база даних абонентів
+  postgres:
+    image: postgres:15-alpine
+    container_name: mobile_operator_postgres
+    environment:
+      POSTGRES_USER: operator_admin
+      POSTGRES_PASSWORD: operator_secret_2024
+      POSTGRES_DB: mobile_operator
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init_scripts/postgres:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U operator_admin -d mobile_operator" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Neo4j - графова база даних для зв'язків
+  neo4j:
+    image: neo4j:5-community
+    container_name: mobile_operator_neo4j
+    environment:
+      NEO4J_AUTH: neo4j/neo4j_secret_2024
+      NEO4J_PLUGINS: '["apoc"]'
+    ports:
+      - "7474:7474" # HTTP
+      - "7687:7687" # Bolt
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:7474" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # CouchDB - документна база для заявок
+  couchdb:
+    image: couchdb:3
+    container_name: mobile_operator_couchdb
+    environment:
+      COUCHDB_USER: couchdb_admin
+      COUCHDB_PASSWORD: couchdb_secret_2024
+    ports:
+      - "5984:5984"
+    volumes:
+      - couchdb_data:/opt/couchdb/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5984/_up" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mobile_operator_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app
+      - ./frontend:/app/frontend
+    environment:
+      - POSTGRES_URL=postgresql://operator_admin:operator_secret_2024@postgres:5432/mobile_operator
+      - NEO4J_URL=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=neo4j_secret_2024
+      - COUCHDB_URL=http://couchdb:5984
+      - COUCHDB_USER=couchdb_admin
+      - COUCHDB_PASSWORD=couchdb_secret_2024
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      couchdb:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  neo4j_data:
+  neo4j_logs:
+  couchdb_data:

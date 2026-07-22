@@ -1,0 +1,40 @@
+test_create_subscriber (__main__.TestSubscriberService.test_create_subscriber)
+Test Case 1: Create a new subscriber ... ERROR
+test_delete_subscriber (__main__.TestSubscriberService.test_delete_subscriber)
+Test Case 4: Delete subscriber ... ok
+test_get_by_id (__main__.TestSubscriberService.test_get_by_id)
+Test Case 2: Get subscriber by ID ... ok
+test_update_subscriber (__main__.TestSubscriberService.test_update_subscriber)
+Test Case 3: Update subscriber info ... ok
+
+======================================================================
+ERROR: test_create_subscriber (__main__.TestSubscriberService.test_create_subscriber)
+Test Case 1: Create a new subscriber
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 720, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1441, in patched
+    return await func(*newargs, **newkeywargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CW_MobileOperator\tests\test_subscriber_service.py", line 22, in test_create_subscriber
+    data = SubscriberCreate(
+        ric_number="123456789",
+    ...<7 lines>...
+        monthly_cost=50.0
+    )
+  File "D:\CW_MobileOperator\.venv\Lib\site-packages\pydantic\main.py", line 250, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+pydantic_core._pydantic_core.ValidationError: 1 validation error for SubscriberCreate
+ric_number
+  String should have at least 10 characters [type=string_too_short, input_value='123456789', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/string_too_short
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.034s
+
+FAILED (errors=1)
